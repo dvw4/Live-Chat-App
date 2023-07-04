@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live Chat App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="chat">
+        <div id="message-box"></div>
+        <div id="input-box">
+            <input type="text" id="user-input" placeholder="Enter your message...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
+    <script>
+        const messageBox = document.getElementById('message-box');
+        const userInput = document.getElementById('user-input');
+
+        const socket = io();
+
+        socket.on('initial_messages', (messages) => {
+            messageBox.innerHTML = '';
+            messages.forEach(({ user, message }) => {
+                appendMessage(user, message);
+            });
+        });
+
+        socket.on('new_message', ({ user, message }) => {
+            appendMessage(user, message);
+        });
+
+        const user = prompt("Please enter your name:");
+
+        function appendMessage(user, message) {
+            const messageElement = document.createElement('div');
+            messageElement.innerHTML = `<strong>${user}:</strong> ${message}`;
+            messageBox.appendChild(messageElement);
+        }
+
+        function sendMessage() {
+            const message = userInput.value;
+
+            if (message) {
+                socket.emit('send_message', { user, message });
+                userInput.value = '';
+            }
+        }
+    </script>
+</body>
+</html>
